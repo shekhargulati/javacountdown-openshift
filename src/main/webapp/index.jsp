@@ -81,7 +81,7 @@
                     </aside>
                     <aside class="white">
                         <p>Powered by:</p>
-                        <a href="layershift.jsp" target="_top"><img src="img/powered_by_layershift.png" width="200" height="68" alt="Layershift" /></a>
+                        <a href="http://www.openshift.com/" target="_blank"><img src="img/powered_by_openshift.png" width="200" height="68" alt="Layershift" /></a>
                     </aside>
                 </div> <!-- #main -->
             </div> <!-- #main-container -->
@@ -89,7 +89,7 @@
             <div class="footer-container">
                 <footer class="wrapper">
                     <p><fmt:message key="footer.selectlang"/> | <fmt:message key="footer.aboutjava"/> | <fmt:message key="footer.developerprivacy"/> | <fmt:message key="footer.termsofuse"/> | <fmt:message key="footer.trademarks"/> | <fmt:message key="footer.disclaimer"/></p>
-                    <p><fmt:message key="footer.jelastic"/></p>
+                    
                 </footer>
             </div>
 

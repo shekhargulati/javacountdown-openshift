@@ -15,13 +15,13 @@
  */
 package org.adoptopenjdk.javacountdown.control;
 
-import org.adoptopenjdk.javacountdown.entity.Visit;
-import com.google.gson.Gson;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -30,6 +30,18 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+
+import org.adoptopenjdk.javacountdown.entity.Visit;
+
+import com.google.code.geocoder.Geocoder;
+import com.google.code.geocoder.GeocoderRequestBuilder;
+import com.google.code.geocoder.model.GeocodeResponse;
+import com.google.code.geocoder.model.GeocoderAddressComponent;
+import com.google.code.geocoder.model.GeocoderRequest;
+import com.google.code.geocoder.model.GeocoderResult;
+import com.google.code.geocoder.model.GeocoderResultType;
+import com.google.code.geocoder.model.LatLng;
+import com.google.gson.Gson;
 
 /**
  * The main Data provider for the JAX-RS services
@@ -130,7 +142,7 @@ public class DataProvider {
      */
     @Asynchronous
     public void persistVisit(Visit visit) {
-        String country = getCountryFromLatLong(visit.getLatitude(), visit.getLongitude());
+        String country = getCountryNameFromCoordinates(visit.getLatitude(), visit.getLongitude());
         setVersion(visit);
         visit.setCountry(country);
         visit.setTime(new Date(System.currentTimeMillis()));
@@ -139,7 +151,26 @@ public class DataProvider {
         logger.log(Level.FINE, "persisted {0}", visit);
     }
 
-    /**
+    private String getCountryNameFromCoordinates(double latitude, double longitude) {
+    	try{
+    		Geocoder geocoder = new Geocoder();
+        	GeocoderRequest geocoderRequest = new GeocoderRequestBuilder().setLanguage("en").setLocation(new LatLng(BigDecimal.valueOf(latitude), BigDecimal.valueOf(longitude))).getGeocoderRequest();
+        	GeocodeResponse geocodeResponse = geocoder.geocode(geocoderRequest);
+        	GeocoderResult geocoderResult = geocodeResponse.getResults().iterator().next();
+        	List<GeocoderAddressComponent> addressComponents = geocoderResult.getAddressComponents();;
+        	for (GeocoderAddressComponent geocoderAddressComponent : addressComponents) {
+    			if(geocoderAddressComponent.getTypes().contains(GeocoderResultType.COUNTRY.value())){
+    				return geocoderAddressComponent.getLongName();
+    			}
+    		}
+    	}catch(Exception e){
+    		// ignore it
+    	}
+    	
+		return "unresolved";
+	}
+
+	/**
      * Parsing the version string to it's numbers. If this fails we still have
      * the String version field in the database ...
      *
